@@ -1,117 +1,135 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🌿 Waste to Taste - Smart Agriculture Monitor</title>
-
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <style>
         :root {
-            --bg-color: #2e2e2e;
-            --card-color: #1e1e1e;
-            --border-color: #333333;
-            --text-primary: #e0e0e0;
-            --text-secondary: #aaaaaa;
+            --bg-color: #1a1a1a;
+            --card-color-rgba: rgba(30, 30, 30, 0.65);
+            --border-color: rgba(255, 255, 255, 0.15);
+            --text-primary: #f0f0f0;
+            --text-secondary: #b0b0b0;
             --accent-primary: #25b800;
             --accent-secondary: #00ce00;
-            --accent-temp:#27fcce;
+            --accent-temp: #27fcce;
+            --accent-ph: #a259ff;
+            --accent-wind: #59a2ff;
             --accent-alert: #ff7675;
             --font-family: 'Poppins', sans-serif;
+            --shadow-color: rgba(0, 0, 0, 0.5);
         }
-
         body {
             font-family: var(--font-family);
-            background-color: var(--bg-color);
+            background: var(--bg-color);
             color: var(--text-primary);
             margin: 0;
-            padding: 2rem 1.5rem;
+            padding: 1rem 1.5rem;
+            min-height: 100vh;
         }
-
         .main-container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
         }
-
         header {
             text-align: center;
-            margin-bottom: 3rem;
+            margin-bottom: 2rem;
+            margin-top: 1rem;
+            text-shadow: 0 2px 10px var(--shadow-color);
         }
-
         h1 {
-            font-size: 2.5rem;
+            font-size: 2.8rem;
             font-weight: 700;
             color: var(--accent-primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 1rem;
         }
-
-        h1 .icon {
-            width: 40px;
-            height: 40px;
-        }
-
         .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
             gap: 1.5rem;
         }
-
         .card {
-            background-color: var(--card-color);
-            border-radius: 15px;
+            background-color: var(--card-color-rgba);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
             padding: 2rem;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 32px 0 var(--shadow-color);
             border: 1px solid var(--border-color);
-            border-left: 5px solid var(--accent-secondary);
             transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.4s ease;
         }
-
         .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+            transform: translateY(-8px);
+            box-shadow: 0 16px 40px 0 var(--shadow-color);
+            border-color: rgba(255, 255, 255, 0.3);
         }
-
+        .weather-card {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2.5rem;
+            flex-wrap: wrap;
+        }
+        .weather-main {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        .weather-main .icon {
+            width: 100px;
+            height: 100px;
+        }
+        .weather-temp {
+            font-size: 5rem;
+            font-weight: 700;
+        }
+        .weather-desc {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            margin-top: -10px;
+        }
+        .weather-details {
+            display: flex;
+            gap: 2.5rem;
+            text-align: center;
+        }
+        .weather-details > div > .label {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+        .weather-details > div > .value {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
         .card.card--alert {
             border-left: 5px solid var(--accent-alert);
         }
-
         .card-header {
             display: flex;
             align-items: center;
             gap: 1rem;
             margin-bottom: 1.5rem;
         }
-
         .card-header .icon {
             width: 32px;
             height: 32px;
-            fill: var(--accent-secondary);
         }
-
         .card h2 {
             font-size: 1.25rem;
             margin: 0;
             font-weight: 600;
-            color: var(--text-primary);
         }
-
-        .value-container {
-            text-align: center;
-        }
-
+        .value-container { text-align: center; }
         .value {
             font-size: 3.5rem;
             font-weight: 700;
-            color: var(--text-primary);
             line-height: 1.2;
         }
-
+        #tempValue { color: var(--accent-temp); }
+        #phValue { color: var(--accent-ph); }
         .alert {
             font-size: 0.9rem;
             font-weight: 500;
@@ -119,114 +137,82 @@
             min-height: 1.2em;
             margin-top: 0.5rem;
         }
-
         .charts-wrapper {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            grid-template-columns: 1fr 1fr;
             gap: 1.5rem;
             margin-top: 2rem;
         }
-
         .chart-container {
-            background-color: var(--card-color);
-            border-radius: 15px;
-            padding: 1.0rem;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            background-color: var(--card-color-rgba);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 32px 0 var(--shadow-color);
             border: 1px solid var(--border-color);
-            height: 500px;
+            height: 400px;
         }
-
         footer {
             margin-top: 3rem;
             font-size: 0.9rem;
             color: var(--text-secondary);
             text-align: center;
         }
-
+        @media (max-width: 1200px) {
+            .dashboard-grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+            .weather-card { grid-column: 1 / -1; }
+        }
         @media (max-width: 768px) {
-            body {
-                padding: 1.5rem 1rem;
-            }
-
-            h1 {
-                font-size: 2rem;
-            }
-
-            .value {
-                font-size: 2.8rem;
-            }
-
-            .card {
-                padding: 1.5rem;
-            }
-
-            .charts-wrapper {
-                grid-template-columns: 1fr;
-            }
+            body { padding: 1.5rem 1rem; }
+            h1 { font-size: 2rem; }
+            .value { font-size: 2.8rem; }
+            .card { padding: 1.5rem; }
+            .charts-wrapper, .dashboard-grid { grid-template-columns: 1fr; }
+            .weather-card { flex-direction: column; gap: 2rem; text-align: center; }
+            .weather-details { gap: 1.5rem; justify-content: center; }
         }
-
-        /* Toggle Switch CSS */
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 60px;
-            height: 34px;
-        }
-
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: var(--text-secondary);
-            transition: .4s;
-            border-radius: 34px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 26px;
-            width: 26px;
-            left: 4px;
-            bottom: 4px;
-            background-color: var(--text-primary);
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked + .slider {
-            background-color: var(--accent-secondary);
-        }
-
-        input:checked + .slider:before {
-            transform: translateX(26px);
-        }
+        .switch { position: relative; display: inline-block; width: 60px; height: 34px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #555; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked+.slider { background-color: var(--accent-secondary); }
+        input:checked+.slider:before { transform: translateX(26px); }
     </style>
 </head>
-
 <body>
     <div class="main-container">
         <header>
-            <h1>
-                Waste to Taste - Agriculture monitoring system
-            </h1>
+            <h1>Waste to Taste - Agriculture Monitoring System</h1>
         </header>
-
         <main>
             <div class="dashboard-grid">
+                <div class="card weather-card">
+                    <div class="weather-main">
+                        <svg id="weatherIcon" class="icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"></svg>
+                        <div>
+                            <div class="weather-temp" id="weatherTemp">--°</div>
+                            <div class="weather-desc" id="weatherDesc">Waiting for data...</div>
+                        </div>
+                    </div>
+                    <div class="weather-details">
+                        <div>
+                            <div class="label">Feels Like</div>
+                            <div class="value" id="weatherFeelsLike">--°</div>
+                        </div>
+                        <div>
+                            <div class="label">Humidity</div>
+                            <div class="value" id="weatherHumidity">--%</div>
+                        </div>
+                        <div>
+                            <div class="label">Wind</div>
+                            <div class="value" id="weatherWind">-- km/h</div>
+                        </div>
+                    </div>
+                </div>
                 <div class="card" id="tempCard">
                     <div class="card-header">
-                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12,8A4,4 0 0,0 8,12A4,4 0 0,0 12,16A4,4 0 0,0 16,12A4,4 0 0,0 12,8M12,14A2,2 0 0,1 10,12A2,2 0 0,1 12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14M10,22H14V20H10V22M11,3H13V1.65L12,1L11,1.65V3M3.5,5.88L4.92,4.46L6.34,5.88L4.92,7.29L3.5,5.88M17.66,5.88L19.08,4.46L20.5,5.88L19.08,7.29L17.66,5.88M19.08,16.83L20.5,18.24L19.08,19.66L17.66,18.24L19.08,16.83M6.34,18.24L4.92,19.66L3.5,18.24L4.92,16.83L6.34,18.24M12,4A7.91,7.91 0 0,0 5.4,6.61L4,8.04V4H2V10H8V8H5.96L7.38,6.58C8.61,5.54 10.23,5 12,5A7,7 0 0,1 19,12C19,12.5 18.93,13 18.81,13.5L20.75,14.06C20.92,13.4 21,12.71 21,12A9,9 0 0,0 12,4Z"></path></svg>
-                        <h2>Temperature</h2>
+                        <svg class="icon" style="color: var(--accent-temp);" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M17 19V5H15V4H9V5H7V19H17M12 18A4 4 0 0 1 8 14C8 11.79 9.42 9.91 11.5 9.13V8H12.5V9.13C14.58 9.91 16 11.79 16 14A4 4 0 0 1 12 18Z"></path></svg>
+                        <h2>Water Temperature</h2>
                     </div>
                     <div class="value-container">
                         <div class="value" id="tempValue">--</div>
@@ -234,11 +220,10 @@
                         <div class="alert" id="tempAlert"></div>
                     </div>
                 </div>
-
                 <div class="card" id="phCard">
                     <div class="card-header">
-                         <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12,2C6.48,2 2,6.48 2,12C2,17.52 6.48,22 12,22C17.52,22 22,17.52 22,12C22,6.48 17.52,2 12,2M12,4A8,8 0 0,1 20,12C20,13.34 19.64,14.6 19,15.68L15.68,19C14.6,19.64 13.34,20 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,10.5C10.7,10.5 9.4,11.23 8.5,12.5C9.4,13.77 10.7,14.5 12,14.5C13.3,14.5 14.6,13.77 15.5,12.5C14.6,11.23 13.3,10.5 12,10.5Z"></path></svg>
-                        <h2>pH Level</h2>
+                        <svg class="icon" style="color: var(--accent-ph);" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12S6.5 22 12 22 22 17.5 22 12 17.5 2 12 2M12 4A8 8 0 0 1 20 12C20 16.42 16.42 20 12 20A1.5 1.5 0 0 1 10.5 18.5A1.5 1.5 0 0 1 12 17A5 5 0 0 0 12 7A5 5 0 0 0 7 12H5A7 7 0 0 1 12 5V4Z"></path></svg>
+                        <h2>Water pH Level</h2>
                     </div>
                     <div class="value-container">
                         <div class="value" id="phValue">--</div>
@@ -246,186 +231,192 @@
                         <div class="alert" id="phAlert"></div>
                     </div>
                 </div>
-
                 <div class="card" id="pumpCard">
                     <div class="card-header">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="icon" viewBox="0 0 16 16">
-                          <path d="M3 2.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5h-5a.5.5 0 0 1-.5-.5z"/>
-                          <path d="M1 2a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v8a2 2 0 0 1 2 2v.5a.5.5 0 0 0 1 0V8h-.5a.5.5 0 0 1-.5-.5V4.375a.5.5 0 0 1 .5-.5h1.495c-.011-.476-.053-.894-.201-1.222a.97.97 0 0 0-.394-.458c-.184-.11-.464-.195-.9-.195a.5.5 0 0 1 0-1q.846-.002 1.412.336c.383.228.634.551.794.907.295.655.294 1.465.294 2.081v3.175a.5.5 0 0 1-.5.501H15v4.5a1.5 1.5 0 0 1-3 0V12a1 1 0 0 0-1-1v4h.5a.5.5 0 0 1 0 1H.5a.5.5 0 0 1 0-1H1zm9 0a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v13h8z"/>
-                        </svg>
+                        <svg class="icon" style="color: var(--accent-secondary);" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12.5,8C11.9,8 11.5,8.2 11.1,8.5L7.3,4.7C7.7,4.3 7.9,3.9 7.9,3.4C7.9,2.6 7.2,2 6.4,2C5.6,2 5,2.6 5,3.4C5,4.2 5.6,4.8 6.4,4.8C6.9,4.8 7.3,4.6 7.6,4.2L11.5,8.1C11.5,8.1 11.5,8.1 11.5,8.1C10.7,8.2 10,8.8 10,9.5V11.5C10,12.3 10.7,13 11.5,13H12.5C13.3,13 14,12.3 14,11.5V9.5C14,8.8 13.3,8 12.5,8M12.5,11H11.5V10H12.5V11M20,13V15L17.2,17.8C16.5,18.5 15.5,19 14.5,19H4C2.9,19 2,18.1 2,17V7C2,5.9 2.9,5 4,5H9.5C10.3,5 11,5.7 11,6.5V7.5H12V6.5C12,4.6 10.4,3 8.5,3H4C1.8,3 0,4.8 0,7V17C0,19.2 1.8,21 4,21H14.5C16.1,21 17.6,20.4 18.6,19.4L22,16V13H20Z"></path></svg>
                         <h2>Pump Control</h2>
                     </div>
-                    <div class="value-container">
-                        <label class="switch">
-                            <input type="checkbox" id="pumpSwitch">
-                            <span class="slider"></span>
+                    <div class="value-container" style="padding-top:1.5rem">
+                        <label class="switch" for="pumpSwitch">
+                            <input type="checkbox" id="pumpSwitch" aria-label="Toggle pump on or off">
+                            <span class="slider" role="presentation"></span>
                         </label>
                     </div>
                 </div>
             </div>
-
             <div class="charts-wrapper">
                 <div class="chart-container">
                     <canvas id="tempChart"></canvas>
                 </div>
-
                 <div class="chart-container">
                     <canvas id="phChart"></canvas>
                 </div>
             </div>
         </main>
-
         <footer>
             Waste to Taste | Real-Time Clean Agriculture Monitoring System
         </footer>
     </div>
-
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // --- Element Selection ---
             const tempValueEl = document.getElementById('tempValue');
             const phValueEl = document.getElementById('phValue');
             const tempAlertEl = document.getElementById('tempAlert');
             const phAlertEl = document.getElementById('phAlert');
             const tempCardEl = document.getElementById('tempCard');
             const phCardEl = document.getElementById('phCard');
+            const pumpSwitch = document.getElementById('pumpSwitch');
+            const weatherTempEl = document.getElementById('weatherTemp');
+            const weatherDescEl = document.getElementById('weatherDesc');
+            const weatherFeelsLikeEl = document.getElementById('weatherFeelsLike');
+            const weatherHumidityEl = document.getElementById('weatherHumidity');
+            const weatherWindEl = document.getElementById('weatherWind');
+            const weatherIconEl = document.getElementById('weatherIcon');
+
+            // --- Chart Setup ---
             const tempCtx = document.getElementById('tempChart').getContext('2d');
             const phCtx = document.getElementById('phChart').getContext('2d');
-            
             const rootStyles = getComputedStyle(document.documentElement);
             const colorTemp = rootStyles.getPropertyValue('--accent-temp').trim();
-            const colorPh = rootStyles.getPropertyValue('--accent-secondary').trim();
-            const textColorPrimary = rootStyles.getPropertyValue('--text-primary').trim();
-            const borderColor = rootStyles.getPropertyValue('--border-color').trim();
+            const colorPh = rootStyles.getPropertyValue('--accent-ph').trim();
 
-            const tempChartData = {
-                labels: [],
-                datasets: [
-                    {
-                        label: 'Temperature (°C)',
+            const tempChart = new Chart(tempCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Water Temperature (°C)',
+                        data: [],
                         borderColor: colorTemp,
-                        backgroundColor: colorTemp + '75',
-                        data: [],
+                        backgroundColor: colorTemp + '33',
                         fill: true,
-                        tension: 0.3
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: false, title: { display: true, text: 'Temperature (°C)' } },
+                        x: { title: { display: true, text: 'Time' } }
                     }
-                ]
-            };
+                }
+            });
 
-            const phChartData = {
-                labels: [],
-                datasets: [
-                    {
-                        label: 'pH Level',
+            const phChart = new Chart(phCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Water pH',
+                        data: [],
                         borderColor: colorPh,
-                        backgroundColor: colorPh + '75',
-                        data: [],
+                        backgroundColor: colorPh + '33',
                         fill: true,
-                        tension: 0.3
-                    }
-                ]
-            };
-
-            const chartOptions = {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: {
-                    mode: 'index',
-                    intersect: false,
+                        tension: 0.4
+                    }]
                 },
-                scales: {
-                    y: {
-                        beginAtZero: false,
-                        grid: { color: borderColor },
-                        ticks: { color: textColorPrimary, font: { family: "'Poppins', sans-serif" } }
-                    },
-                    x: {
-                        grid: { display: false },
-                        ticks: { color: textColorPrimary, font: { family: "'Poppins', sans-serif" } }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: false, title: { display: true, text: 'pH' } },
+                        x: { title: { display: true, text: 'Time' } }
                     }
-                },
-                plugins: { /* ... options from previous code ... */ }
-            };
-
-            const tempSensorChart = new Chart(tempCtx, {
-                type: 'line',
-                data: tempChartData,
-                options: chartOptions
+                }
             });
 
-            const phSensorChart = new Chart(phCtx, {
-                type: 'line',
-                data: phChartData,
-                options: chartOptions
-            });
-
-            // --- WebSocket Connection ---
-            // IMPORTANT: Replace '192.168.1.9' with the IP address from YOUR Python server's output.
-            const ws = new WebSocket('ws://192.168.1.9:6789/');
-            
-            ws.onopen = () => {
-                console.log('WebSocket connection established.');
-                document.querySelector('h1').style.color = 'var(--accent-primary)'; // Visual feedback for connection
-            };
-            
-            ws.onerror = (error) => {
-                console.error('WebSocket error:', error);
-                document.querySelector('h1').style.color = 'var(--accent-alert)'; // Visual feedback for error
-            };
-            
-            ws.onclose = () => {
-                console.log('WebSocket connection closed.');
-                 document.querySelector('h1').style.color = 'var(--text-secondary)'; // Visual feedback for disconnection
+            // --- Weather Icon Mapping ---
+            const weatherIcons = {
+                'Clear': '<path d="M32 12a6 6 0 100 12 6 6 0 000-12zm0 10a4 4 0 110-8 4 4 0 010 8z" fill="#fbb03b"/><path d="M32 8v-4M32 56v-4M12 12l-2.83-2.83M52 52l-2.83-2.83M8 32H4M60 32h-4M12 52l-2.83 2.83M52 12l-2.83 2.83" stroke="#fbb03b" stroke-width="4" stroke-linecap="round"/>',
+                'Clouds': '<path d="M41.5 15.5A14.5 14.5 0 0014.6 22a10.5 10.5 0 00-1.1 20.9h32.1a12.5 12.5 0 00.4-24.9z" fill="#e6e6e6" stroke="#e6e6e6" stroke-width="3"/>',
+                'Rain': '<path d="M41.5 15.5A14.5 14.5 0 0014.6 22a10.5 10.5 0 00-1.1 20.9h32.1a12.5 12.5 0 00.4-24.9z" fill="#e6e6e6" stroke="#e6e6e6" stroke-width="3"/><path d="M24 44l-2 8M32 44l-2 8M40 44l-2 8" stroke="#59a2ff" stroke-width="4" stroke-linecap="round"/>',
+                'Drizzle': '<path d="M41.5 15.5A14.5 14.5 0 0014.6 22a10.5 10.5 0 00-1.1 20.9h32.1a12.5 12.5 0 00.4-24.9z" fill="#e6e6e6" stroke="#e6e6e6" stroke-width="3"/><path d="M24 44l-1 4M32 44l-1 4M40 44l-1 4" stroke="#59a2ff" stroke-width="3" stroke-linecap="round"/>',
+                'Thunderstorm': '<path d="M41.5 15.5A14.5 14.5 0 0014.6 22a10.5 10.5 0 00-1.1 20.9h32.1a12.5 12.5 0 00.4-24.9z" fill="#e6e6e6" stroke="#e6e6e6" stroke-width="3"/><path d="M28 44l-4 8h4l-2 8l8-12h-4l4-4z" fill="#fbb03b" stroke="#fbb03b" stroke-width="2"/>',
+                'Snow': '<path d="M41.5 15.5A14.5 14.5 0 0014.6 22a10.5 10.5 0 00-1.1 20.9h32.1a12.5 12.5 0 00.4-24.9z" fill="#e6e6e6" stroke="#e6e6e6" stroke-width="3"/><path d="M32 44l-2 8M24 48l-4 4M40 48l4 4M28 44l4 8M24 48l4 4M36 48l-4 4" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>',
+                'Fog': '<path d="M41.5 15.5A14.5 14.5 0 0014.6 22a10.5 10.5 0 00-1.1 20.9h32.1a12.5 12.5 0 00.4-24.9z" fill="#e6e6e6" stroke="#e6e6e6" stroke-width="3"/><path d="M16 44h32M16 48h32M16 52h32" stroke="#b0b0b0" stroke-width="3"/>',
+                'Unknown': '<path d="M41.5 15.5A14.5 14.5 0 0014.6 22a10.5 10.5 0 00-1.1 20.9h32.1a12.5 12.5 0 00.4-24.9z" fill="#e6e6e6" stroke="#e6e6e6" stroke-width="3"/>'
             };
 
-            ws.onmessage = (event) => {
-                console.log('Received:', event.data);
-                const parts = event.data.split(',');
+            // --- WebSocket Setup ---
+            let ws;
+            function connectWebSocket() {
+                // Replace with the IP address printed by your backend
+                ws = new WebSocket('ws://192.168.1.7:6789');
+                
+                ws.onopen = () => {
+                    console.log('WebSocket connected');
+                    weatherDescEl.textContent = 'Connected';
+                };
 
-                if (parts.length === 2) {
-                    const temp = parseFloat(parts[0]);
-                    const ph = parseFloat(parts[1]);
-                    updateDashboard(temp, ph);
-                }
-            };
-            // --- End of WebSocket Section ---
+                ws.onmessage = (event) => {
+                    const data = event.data.split(',');
+                    if (data.length >= 7) {
+                        const [sensorTemp, sensorPh, weatherTemp, weatherFeelsLike, weatherHumidity, weatherCondition, weatherWind] = data;
 
+                        // Update sensor data
+                        tempValueEl.textContent = parseFloat(sensorTemp).toFixed(2);
+                        phValueEl.textContent = parseFloat(sensorPh).toFixed(2);
 
-            function updateDashboard(temp, ph) {
-                tempValueEl.innerText = temp.toFixed(2);
-                phValueEl.innerText = ph.toFixed(2);
+                        // Update weather data
+                        weatherTempEl.textContent = `${parseFloat(weatherTemp).toFixed(1)}°`;
+                        weatherFeelsLikeEl.textContent = `${parseFloat(weatherFeelsLike).toFixed(1)}°`;
+                        weatherHumidityEl.textContent = `${parseInt(weatherHumidity)}%`;
+                        weatherWindEl.textContent = `${parseFloat(weatherWind).toFixed(1)} km/h`;
+                        weatherDescEl.textContent = weatherCondition;
 
-                const isTempAlert = temp < 10 || temp > 35;
-                tempAlertEl.innerText = isTempAlert ? 'Harmful level detected!' : '';
-                tempCardEl.classList.toggle('card--alert', isTempAlert);
+                        // Update weather icon
+                        weatherIconEl.innerHTML = weatherIcons[weatherCondition] || weatherIcons['Unknown'];
 
-                const isPhAlert = ph < 5.5 || ph > 7.5;
-                phAlertEl.innerText = isPhAlert ? 'Harmful level detected!' : '';
-                phCardEl.classList.toggle('card--alert', isPhAlert);
+                        // Update charts
+                        const time = new Date().toLocaleTimeString();
+                        tempChart.data.labels.push(time);
+                        tempChart.data.datasets[0].data.push(parseFloat(sensorTemp));
+                        phChart.data.labels.push(time);
+                        phChart.data.datasets[0].data.push(parseFloat(sensorPh));
 
-                const now = new Date().toLocaleTimeString('en-GB');
+                        if (tempChart.data.labels.length > 20) {
+                            tempChart.data.labels.shift();
+                            tempChart.data.datasets[0].data.shift();
+                            phChart.data.labels.shift();
+                            phChart.data.datasets[0].data.shift();
+                        }
 
-                if (tempChartData.labels.length >= 20) {
-                    tempChartData.labels.shift();
-                    tempChartData.datasets[0].data.shift();
-                }
-                tempChartData.labels.push(now);
-                tempChartData.datasets[0].data.push(temp.toFixed(2));
-                tempSensorChart.update();
+                        tempChart.update();
+                        phChart.update();
 
-                if (phChartData.labels.length >= 20) {
-                    phChartData.labels.shift();
-                    phChartData.datasets[0].data.shift();
-                }
-                phChartData.labels.push(now);
-                phChartData.datasets[0].data.push(ph.toFixed(2));
-                phSensorChart.update();
+                        // Alerts
+                        const temp = parseFloat(sensorTemp);
+                        const ph = parseFloat(sensorPh);
+                        tempCardEl.classList.toggle('card--alert', temp < 15 || temp > 35);
+                        tempAlertEl.textContent = temp < 26 ? 'Temperature too low!' : temp > 30 ? 'Temperature too high!' : '';
+                        phCardEl.classList.toggle('card--alert', ph < 6 || ph > 7);
+                        phAlertEl.textContent = ph < 6 ? 'pH too low!' : ph > 7 ? 'pH too high!' : '';
+                    }
+                };
+
+                ws.onclose = () => {
+                    console.log('WebSocket disconnected, reconnecting...');
+                    weatherDescEl.textContent = 'Disconnected, reconnecting...';
+                    setTimeout(connectWebSocket, 5000);
+                };
+
+                ws.onerror = (error) => {
+                    console.error('WebSocket error:', error);
+                    weatherDescEl.textContent = 'WebSocket error';
+                };
             }
 
-            // Pump Switch Event Listener
-            const pumpSwitch = document.getElementById('pumpSwitch');
-            pumpSwitch.addEventListener('change', (event) => {
-                ws.send(event.target.checked ? 'ON' : 'OFF');
+            // --- Pump Control ---
+            pumpSwitch.addEventListener('change', () => {
+                if (ws && ws.readyState === WebSocket.OPEN) {
+                    ws.send(pumpSwitch.checked ? 'ON' : 'OFF');
+                }
             });
+
+            // Start WebSocket connection
+            connectWebSocket();
         });
     </script>
 </body>
