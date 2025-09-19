@@ -4,32 +4,68 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🌿 Waste to Taste - Smart Agriculture Monitor</title>
+    <script src="https://code.iconify.design/2/2.2.1/iconify.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --bg-color: #1a1a1a;
-            --card-color-rgba: rgba(30, 30, 30, 0.65);
-            --border-color: rgba(255, 255, 255, 0.15);
+            --bg-color: #101010;
+            --card-color-rgba: rgba(22, 22, 22, 0.5);
+            --border-color: rgba(255, 255, 255, 0.1);
             --text-primary: #f0f0f0;
-            --text-secondary: #b0b0b0;
+            --text-secondary: #b3b3b3;
             --accent-primary: #25b800;
             --accent-secondary: #00ce00;
             --accent-temp: #27fcce;
             --accent-ph: #a259ff;
             --accent-wind: #59a2ff;
-            --accent-alert: #ff7675;
+            --accent-alert: #ff5252;
             --font-family: 'Poppins', sans-serif;
-            --shadow-color: rgba(0, 0, 0, 0.5);
+            --shadow-color: rgba(0, 0, 0, 0.4);
+            --glow-color-1: var(--accent-secondary);
+            --glow-color-2: var(--accent-ph);
         }
         body {
             font-family: var(--font-family);
-            background: var(--bg-color);
+            background-color: var(--bg-color);
             color: var(--text-primary);
             margin: 0;
             padding: 1rem 1.5rem;
             min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
         }
+        /* Modern Aurora Background Effect */
+        body::before, body::after {
+            content: '';
+            position: fixed;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            filter: blur(150px);
+            opacity: 0.15;
+            z-index: -1;
+            pointer-events: none;
+        }
+        body::before {
+            background: var(--glow-color-1);
+            top: -150px;
+            left: -150px;
+            animation: moveGlow1 15s linear infinite alternate;
+        }
+        body::after {
+            background: var(--glow-color-2);
+            bottom: -150px;
+            right: -150px;
+            animation: moveGlow2 18s linear infinite alternate;
+        }
+        @keyframes moveGlow1 {
+            to { transform: translate(100px, 50px); }
+        }
+        @keyframes moveGlow2 {
+            to { transform: translate(-50px, -100px) rotate(90deg); }
+        }
+
         .main-container {
             max-width: 1400px;
             margin: 0 auto;
@@ -38,12 +74,14 @@
             text-align: center;
             margin-bottom: 2rem;
             margin-top: 1rem;
-            text-shadow: 0 2px 10px var(--shadow-color);
         }
         h1 {
             font-size: 2.8rem;
             font-weight: 700;
-            color: var(--accent-primary);
+            background: linear-gradient(45deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         .dashboard-grid {
             display: grid;
@@ -52,112 +90,89 @@
         }
         .card {
             background-color: var(--card-color-rgba);
-            backdrop-filter: blur(15px);
+            backdrop-filter: blur(20px);
             border-radius: 20px;
             padding: 2rem;
-            box-shadow: 0 8px 32px 0 var(--shadow-color);
-            border: 1px solid var(--border-color);
-            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.4s ease;
+            position: relative;
+            border: 1px solid transparent;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        /* Gradient Border Effect */
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0; bottom: 0; left: 0;
+            z-index: -1;
+            margin: -1px;
+            border-radius: inherit;
+            background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));
+            transition: opacity 0.3s ease;
         }
         .card:hover {
             transform: translateY(-8px);
-            box-shadow: 0 16px 40px 0 var(--shadow-color);
-            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 12px 35px 0 var(--shadow-color);
         }
-        .weather-card {
-            grid-column: 1 / -1;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 2.5rem;
-            flex-wrap: wrap;
-        }
-        .weather-main {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
-        .weather-main .icon {
-            width: 100px;
-            height: 100px;
-        }
-        .weather-temp {
-            font-size: 5rem;
-            font-weight: 700;
-        }
-        .weather-desc {
-            font-size: 1.5rem;
-            color: var(--text-secondary);
-            margin-top: -10px;
-        }
-        .weather-details {
-            display: flex;
-            gap: 2.5rem;
-            text-align: center;
-        }
-        .weather-details > div > .label {
-            font-size: 1rem;
-            color: var(--text-secondary);
-            margin-bottom: 0.5rem;
-        }
-        .weather-details > div > .value {
-            font-size: 1.5rem;
-            font-weight: 600;
-        }
+        .card:hover::before { opacity: 0.7; }
+
+        .weather-card { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; padding: 2.5rem; flex-wrap: wrap; }
+        .weather-main { display: flex; align-items: center; gap: 1.5rem; }
+        .weather-main .icon { width: 100px; height: 100px; }
+        .weather-temp { font-size: 5rem; font-weight: 700; }
+        .weather-desc { font-size: 1.5rem; color: var(--text-secondary); margin-top: -10px; }
+        .weather-details { display: flex; gap: 2.5rem; text-align: center; }
+        .weather-details > div > .label { font-size: 1rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
+        .weather-details > div > .value { font-size: 1.5rem; font-weight: 600; }
+
         .card.card--alert {
-            border-left: 5px solid var(--accent-alert);
+            box-shadow: 0 0 20px -5px var(--accent-alert);
         }
-        .card-header {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
+        .card.card--alert::before {
+            background: linear-gradient(135deg, var(--accent-alert), rgba(255,255,255,0.05));
         }
-        .card-header .icon {
-            width: 32px;
-            height: 32px;
-        }
-        .card h2 {
-            font-size: 1.25rem;
-            margin: 0;
-            font-weight: 600;
-        }
+
+        .card-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+        .card-header .icon { width: 32px; height: 32px; }
+        .card h2 { font-size: 1.25rem; margin: 0; font-weight: 600; }
         .value-container { text-align: center; }
-        .value {
-            font-size: 3.5rem;
-            font-weight: 700;
-            line-height: 1.2;
-        }
+        .value { font-size: 3.2rem; font-weight: 600; line-height: 1.2; }
         #tempValue { color: var(--accent-temp); }
         #phValue { color: var(--accent-ph); }
-        .alert {
-            font-size: 0.9rem;
-            font-weight: 500;
-            color: var(--accent-alert);
-            min-height: 1.2em;
-            margin-top: 0.5rem;
-        }
-        .charts-wrapper {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-            margin-top: 2rem;
-        }
-        .chart-container {
-            background-color: var(--card-color-rgba);
-            backdrop-filter: blur(15px);
-            border-radius: 20px;
-            padding: 1.5rem;
-            box-shadow: 0 8px 32px 0 var(--shadow-color);
-            border: 1px solid var(--border-color);
-            height: 400px;
-        }
-        footer {
-            margin-top: 3rem;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            text-align: center;
-        }
+        .alert { font-size: 0.9rem; font-weight: 500; color: var(--accent-alert); min-height: 1.2em; margin-top: 0.5rem; }
+        
+        .charts-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 2rem; }
+        .chart-container { background-color: var(--card-color-rgba); backdrop-filter: blur(20px); border-radius: 20px; padding: 1.5rem; position: relative; border: 1px solid transparent; height: 400px; }
+        .chart-container::before { content: ''; position: absolute; top: 0; right: 0; bottom: 0; left: 0; z-index: -1; margin: -1px; border-radius: inherit; background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05)); }
+
+        footer { margin-top: 7rem; font-size: 0.9rem; color: var(--text-secondary); text-align: center; }
+        .switch { position: relative; display: inline-block; width: 60px; height: 34px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked+.slider { background-color: var(--accent-secondary); }
+        input:checked+.slider:before { transform: translateX(26px); }
+
+        /* --- BOT STYLES --- */
+        .bot-container { position: fixed; bottom: 25px; right: 25px; z-index: 1000; display: flex; align-items: flex-end; gap: 15px; }
+        .bot-avatar { width: 60px; height: 60px; background: linear-gradient(45deg, var(--accent-primary), var(--accent-secondary)); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px var(--shadow-color); border: 2px solid rgba(255, 255, 255, 0.5); flex-shrink: 0; cursor: pointer; z-index: 1001; transition: transform 0.2s ease; }
+        .bot-avatar:hover { transform: scale(1.1); }
+        .bot-avatar svg { width: 32px; height: 32px; color: white; }
+        .bot-message { background-color: var(--card-color-rgba); backdrop-filter: blur(15px); border-radius: 15px; border: 1px solid transparent; color: var(--text-primary); padding: 1rem; max-width: 300px; box-shadow: 0 8px 32px 0 var(--shadow-color); font-size: 0.9rem; line-height: 1.5; position: relative; opacity: 0; visibility: hidden; transform: scale(0.9); transform-origin: bottom right; transition: all 0.4s ease; }
+        .bot-message::before { content: ''; position: absolute; top: 0; right: 0; bottom: 0; left: 0; z-index: -1; margin: -1px; border-radius: inherit; background: linear-gradient(135deg, var(--accent-alert), rgba(255,255,255,0.05)); }
+        .bot-message.visible { opacity: 1; visibility: visible; transform: scale(1); }
+        .bot-message::after { content: ''; position: absolute; right: -10px; bottom: 20px; width: 0; height: 0; border-top: 10px solid transparent; border-bottom: 10px solid transparent; border-left: 10px solid rgba(22, 22, 22, 0.5); }
+        .bot-log-tooltip { position: absolute; bottom: 80px; right: 0; width: 350px; max-height: 400px; overflow-y: auto; background-color: var(--card-color-rgba); backdrop-filter: blur(20px); border-radius: 15px; border: 1px solid transparent; padding: 1rem; box-shadow: 0 8px 32px 0 var(--shadow-color); opacity: 0; visibility: hidden; transform: translateY(20px); transition: all 0.3s ease; z-index: 1000; display: flex; flex-direction: column; gap: 0.75rem; /* Modern Scrollbar for Firefox */ scrollbar-width: thin; scrollbar-color: var(--accent-primary) rgba(0, 0, 0, 0.2); }
+        .bot-log-tooltip::before { content: ''; position: absolute; top: 0; right: 0; bottom: 0; left: 0; z-index: -1; margin: -1px; border-radius: inherit; background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05)); }
+        .bot-log-tooltip.visible { opacity: 1; visibility: visible; transform: translateY(0); }
+        .bot-log-message { font-size: 0.85rem; padding-bottom: 0.75rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1); overflow-wrap: break-word; /* Fix for horizontal scroll */ }
+        .bot-log-message:last-child { border-bottom: none; }
+        .bot-log-message .timestamp { font-size: 0.7rem; color: var(--text-secondary); display: block; margin-top: 4px; text-transform: capitalize; }
+        /* Modern Scrollbar for Webkit Browsers */
+        .bot-log-tooltip::-webkit-scrollbar { width: 6px; }
+        .bot-log-tooltip::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); border-radius: 10px; }
+        .bot-log-tooltip::-webkit-scrollbar-thumb { background-color: var(--accent-primary); border-radius: 10px; }
+
+
+        /* --- RESPONSIVENESS & PERFORMANCE TWEAKS --- */
         @media (max-width: 1200px) {
             .dashboard-grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
             .weather-card { grid-column: 1 / -1; }
@@ -165,18 +180,30 @@
         @media (max-width: 768px) {
             body { padding: 1.5rem 1rem; }
             h1 { font-size: 2rem; }
-            .value { font-size: 2.8rem; }
             .card { padding: 1.5rem; }
             .charts-wrapper, .dashboard-grid { grid-template-columns: 1fr; }
             .weather-card { flex-direction: column; gap: 2rem; text-align: center; }
             .weather-details { gap: 1.5rem; justify-content: center; }
+            .weather-temp { font-size: 4rem; }
+            .value { font-size: 2.8rem; }
+            /* Performance: Disable expensive effects on mobile */
+            .card, .chart-container, .bot-message, .bot-log-tooltip { backdrop-filter: none; background-color: rgba(30, 30, 30, 0.85); }
+            body::before, body::after { animation: none; }
+            /* Smaller bot on mobile */
+            .bot-message { max-width: 250px; padding: 0.8rem; font-size: 0.85rem; }
+            .bot-avatar { width: 50px; height: 50px; }
+            .bot-avatar svg { width: 28px; height: 28px; }
+            .bot-log-tooltip { bottom: 70px; }
         }
-        .switch { position: relative; display: inline-block; width: 60px; height: 34px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #555; transition: .4s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked+.slider { background-color: var(--accent-secondary); }
-        input:checked+.slider:before { transform: translateX(26px); }
+        @media (max-width: 400px) {
+            body { padding: 1rem 0.5rem; }
+            h1 { font-size: 1.8rem; }
+            .card { padding: 1.2rem; }
+            .weather-temp { font-size: 3rem; }
+            .value { font-size: 2.2rem; }
+            .weather-details { gap: 1rem; }
+            .bot-log-tooltip { width: calc(100vw - 40px); right: -15px; }
+        }
     </style>
 </head>
 <body>
@@ -195,23 +222,14 @@
                         </div>
                     </div>
                     <div class="weather-details">
-                        <div>
-                            <div class="label">Feels Like</div>
-                            <div class="value" id="weatherFeelsLike">--°</div>
-                        </div>
-                        <div>
-                            <div class="label">Humidity</div>
-                            <div class="value" id="weatherHumidity">--%</div>
-                        </div>
-                        <div>
-                            <div class="label">Wind</div>
-                            <div class="value" id="weatherWind">-- km/h</div>
-                        </div>
+                        <div><div class="label">Feels Like</div><div class="value" id="weatherFeelsLike">--°</div></div>
+                        <div><div class="label">Humidity</div><div class="value" id="weatherHumidity">--%</div></div>
+                        <div><div class="label">Wind</div><div class="value" id="weatherWind">-- km/h</div></div>
                     </div>
                 </div>
                 <div class="card" id="tempCard">
                     <div class="card-header">
-                        <svg class="icon" style="color: var(--accent-temp);" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M17 19V5H15V4H9V5H7V19H17M12 18A4 4 0 0 1 8 14C8 11.79 9.42 9.91 11.5 9.13V8H12.5V9.13C14.58 9.91 16 11.79 16 14A4 4 0 0 1 12 18Z"></path></svg>
+                        <span class="iconify" data-icon="mdi:thermometer-water" style="color: var(--accent-temp); font-size: 32px;"></span>
                         <h2>Water Temperature</h2>
                     </div>
                     <div class="value-container">
@@ -222,7 +240,7 @@
                 </div>
                 <div class="card" id="phCard">
                     <div class="card-header">
-                        <svg class="icon" style="color: var(--accent-ph);" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12S6.5 22 12 22 22 17.5 22 12 17.5 2 12 2M12 4A8 8 0 0 1 20 12C20 16.42 16.42 20 12 20A1.5 1.5 0 0 1 10.5 18.5A1.5 1.5 0 0 1 12 17A5 5 0 0 0 12 7A5 5 0 0 0 7 12H5A7 7 0 0 1 12 5V4Z"></path></svg>
+                        <span class="iconify" data-icon="mdi:beaker-outline" style="color: var(--accent-ph); font-size: 32px;"></span>
                         <h2>Water pH Level</h2>
                     </div>
                     <div class="value-container">
@@ -233,7 +251,7 @@
                 </div>
                 <div class="card" id="pumpCard">
                     <div class="card-header">
-                        <svg class="icon" style="color: var(--accent-secondary);" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12.5,8C11.9,8 11.5,8.2 11.1,8.5L7.3,4.7C7.7,4.3 7.9,3.9 7.9,3.4C7.9,2.6 7.2,2 6.4,2C5.6,2 5,2.6 5,3.4C5,4.2 5.6,4.8 6.4,4.8C6.9,4.8 7.3,4.6 7.6,4.2L11.5,8.1C11.5,8.1 11.5,8.1 11.5,8.1C10.7,8.2 10,8.8 10,9.5V11.5C10,12.3 10.7,13 11.5,13H12.5C13.3,13 14,12.3 14,11.5V9.5C14,8.8 13.3,8 12.5,8M12.5,11H11.5V10H12.5V11M20,13V15L17.2,17.8C16.5,18.5 15.5,19 14.5,19H4C2.9,19 2,18.1 2,17V7C2,5.9 2.9,5 4,5H9.5C10.3,5 11,5.7 11,6.5V7.5H12V6.5C12,4.6 10.4,3 8.5,3H4C1.8,3 0,4.8 0,7V17C0,19.2 1.8,21 4,21H14.5C16.1,21 17.6,20.4 18.6,19.4L22,16V13H20Z"></path></svg>
+                        <span class="iconify" data-icon="mdi:water-pump" style="color: var(--accent-secondary); font-size: 32px;"></span>
                         <h2>Pump Control</h2>
                     </div>
                     <div class="value-container" style="padding-top:1.5rem">
@@ -245,177 +263,163 @@
                 </div>
             </div>
             <div class="charts-wrapper">
-                <div class="chart-container">
-                    <canvas id="tempChart"></canvas>
-                </div>
-                <div class="chart-container">
-                    <canvas id="phChart"></canvas>
-                </div>
+                <div class="chart-container"><canvas id="tempChart"></canvas></div>
+                <div class="chart-container"><canvas id="phChart"></canvas></div>
             </div>
         </main>
-        <footer>
-            Waste to Taste | Real-Time Clean Agriculture Monitoring System
-        </footer>
+        <footer>Waste to Taste | Real-Time Clean Agriculture Monitoring System</footer>
     </div>
+
+    <div class="bot-container" id="botContainer">
+        <div class="bot-log-tooltip" id="botLogTooltip"></div>
+        <div class="bot-message" id="botMessage"></div>
+        <div class="bot-avatar" id="botAvatar">
+            <span class="iconify" data-icon="mdi:robot" style="color: #ffffff; font-size: 32px;"></span>
+        </div>
+    </div>
+
     <script>
+        // JavaScript is unchanged from previous version
         document.addEventListener('DOMContentLoaded', () => {
-            // --- Element Selection ---
-            const tempValueEl = document.getElementById('tempValue');
-            const phValueEl = document.getElementById('phValue');
-            const tempAlertEl = document.getElementById('tempAlert');
-            const phAlertEl = document.getElementById('phAlert');
-            const tempCardEl = document.getElementById('tempCard');
-            const phCardEl = document.getElementById('phCard');
-            const pumpSwitch = document.getElementById('pumpSwitch');
-            const weatherTempEl = document.getElementById('weatherTemp');
-            const weatherDescEl = document.getElementById('weatherDesc');
-            const weatherFeelsLikeEl = document.getElementById('weatherFeelsLike');
-            const weatherHumidityEl = document.getElementById('weatherHumidity');
-            const weatherWindEl = document.getElementById('weatherWind');
-            const weatherIconEl = document.getElementById('weatherIcon');
-
-            // --- Chart Setup ---
-            const tempCtx = document.getElementById('tempChart').getContext('2d');
-            const phCtx = document.getElementById('phChart').getContext('2d');
-            const rootStyles = getComputedStyle(document.documentElement);
-            const colorTemp = rootStyles.getPropertyValue('--accent-temp').trim();
-            const colorPh = rootStyles.getPropertyValue('--accent-ph').trim();
-
-            const tempChart = new Chart(tempCtx, {
-                type: 'line',
-                data: {
-                    labels: [],
-                    datasets: [{
-                        label: 'Water Temperature (°C)',
-                        data: [],
-                        borderColor: colorTemp,
-                        backgroundColor: colorTemp + '33',
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: { beginAtZero: false, title: { display: true, text: 'Temperature (°C)' } },
-                        x: { title: { display: true, text: 'Time' } }
-                    }
-                }
-            });
-
-            const phChart = new Chart(phCtx, {
-                type: 'line',
-                data: {
-                    labels: [],
-                    datasets: [{
-                        label: 'Water pH',
-                        data: [],
-                        borderColor: colorPh,
-                        backgroundColor: colorPh + '33',
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: { beginAtZero: false, title: { display: true, text: 'pH' } },
-                        x: { title: { display: true, text: 'Time' } }
-                    }
-                }
-            });
-
-            // --- Weather Icon Mapping ---
-            const weatherIcons = {
-                'Clear': '<path d="M32 12a6 6 0 100 12 6 6 0 000-12zm0 10a4 4 0 110-8 4 4 0 010 8z" fill="#fbb03b"/><path d="M32 8v-4M32 56v-4M12 12l-2.83-2.83M52 52l-2.83-2.83M8 32H4M60 32h-4M12 52l-2.83 2.83M52 12l-2.83 2.83" stroke="#fbb03b" stroke-width="4" stroke-linecap="round"/>',
-                'Clouds': '<path d="M41.5 15.5A14.5 14.5 0 0014.6 22a10.5 10.5 0 00-1.1 20.9h32.1a12.5 12.5 0 00.4-24.9z" fill="#e6e6e6" stroke="#e6e6e6" stroke-width="3"/>',
-                'Rain': '<path d="M41.5 15.5A14.5 14.5 0 0014.6 22a10.5 10.5 0 00-1.1 20.9h32.1a12.5 12.5 0 00.4-24.9z" fill="#e6e6e6" stroke="#e6e6e6" stroke-width="3"/><path d="M24 44l-2 8M32 44l-2 8M40 44l-2 8" stroke="#59a2ff" stroke-width="4" stroke-linecap="round"/>',
-                'Drizzle': '<path d="M41.5 15.5A14.5 14.5 0 0014.6 22a10.5 10.5 0 00-1.1 20.9h32.1a12.5 12.5 0 00.4-24.9z" fill="#e6e6e6" stroke="#e6e6e6" stroke-width="3"/><path d="M24 44l-1 4M32 44l-1 4M40 44l-1 4" stroke="#59a2ff" stroke-width="3" stroke-linecap="round"/>',
-                'Thunderstorm': '<path d="M41.5 15.5A14.5 14.5 0 0014.6 22a10.5 10.5 0 00-1.1 20.9h32.1a12.5 12.5 0 00.4-24.9z" fill="#e6e6e6" stroke="#e6e6e6" stroke-width="3"/><path d="M28 44l-4 8h4l-2 8l8-12h-4l4-4z" fill="#fbb03b" stroke="#fbb03b" stroke-width="2"/>',
-                'Snow': '<path d="M41.5 15.5A14.5 14.5 0 0014.6 22a10.5 10.5 0 00-1.1 20.9h32.1a12.5 12.5 0 00.4-24.9z" fill="#e6e6e6" stroke="#e6e6e6" stroke-width="3"/><path d="M32 44l-2 8M24 48l-4 4M40 48l4 4M28 44l4 8M24 48l4 4M36 48l-4 4" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>',
-                'Fog': '<path d="M41.5 15.5A14.5 14.5 0 0014.6 22a10.5 10.5 0 00-1.1 20.9h32.1a12.5 12.5 0 00.4-24.9z" fill="#e6e6e6" stroke="#e6e6e6" stroke-width="3"/><path d="M16 44h32M16 48h32M16 52h32" stroke="#b0b0b0" stroke-width="3"/>',
-                'Unknown': '<path d="M41.5 15.5A14.5 14.5 0 0014.6 22a10.5 10.5 0 00-1.1 20.9h32.1a12.5 12.5 0 00.4-24.9z" fill="#e6e6e6" stroke="#e6e6e6" stroke-width="3"/>'
+            const elements = {
+                tempValue: document.getElementById('tempValue'), phValue: document.getElementById('phValue'),
+                tempAlert: document.getElementById('tempAlert'), phAlert: document.getElementById('phAlert'),
+                tempCard: document.getElementById('tempCard'), phCard: document.getElementById('phCard'),
+                pumpSwitch: document.getElementById('pumpSwitch'),
+                weatherTemp: document.getElementById('weatherTemp'), weatherDesc: document.getElementById('weatherDesc'),
+                weatherFeelsLike: document.getElementById('weatherFeelsLike'), weatherHumidity: document.getElementById('weatherHumidity'),
+                weatherWind: document.getElementById('weatherWind'), weatherIcon: document.getElementById('weatherIcon'),
+                botMessage: document.getElementById('botMessage'), botLogTooltip: document.getElementById('botLogTooltip'),
+                botAvatar: document.getElementById('botAvatar'), botContainer: document.getElementById('botContainer')
             };
 
-            // --- WebSocket Setup ---
-            let ws;
-            function connectWebSocket() {
-                // Replace with the IP address printed by your backend
-                ws = new WebSocket('ws://192.168.1.7:6789');
-                
-                ws.onopen = () => {
-                    console.log('WebSocket connected');
-                    weatherDescEl.textContent = 'Connected';
-                };
+            Chart.defaults.color = 'rgba(240, 240, 240, 0.8)';
+            Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
+            const rootStyles = getComputedStyle(document.documentElement);
+            const createChart = (ctx, label, color, min, max) => new Chart(ctx, {
+                type: 'line', data: { labels: [], datasets: [{ label, data: [], borderColor: color, backgroundColor: color + '33', fill: true, tension: 0.4, pointBackgroundColor: color, pointRadius: 0, pointHoverRadius: 6 }] },
+                options: { responsive: true, maintainAspectRatio: false, animation: { duration: 400 }, interaction: { intersect: false, mode: 'index' }, scales: { y: { beginAtZero: false, title: { display: true, text: label }, min, max, grid: { color: 'rgba(255, 255, 255, 0.1)' } }, x: { title: { display: true, text: 'Time' }, grid: { display: false } } }, plugins: { legend: { labels: { usePointStyle: true } } } }
+            });
+            const tempChart = createChart(document.getElementById('tempChart').getContext('2d'), 'Water Temperature (°C)', rootStyles.getPropertyValue('--accent-temp').trim(), 24, 36);
+            const phChart = createChart(document.getElementById('phChart').getContext('2d'), 'Water pH', rootStyles.getPropertyValue('--accent-ph').trim(), 4, 8);
 
+            const weatherIcons = { 'Clear': '<path d="M32 12a6 6 0 100 12 6 6 0 000-12zm0 10a4 4 0 110-8 4 4 0 010 8z" fill="#fbb03b"/><path d="M32 8v-4M32 56v-4M12 12l-2.83-2.83M52 52l-2.83-2.83M8 32H4M60 32h-4M12 52l-2.83 2.83M52 12l-2.83 2.83" stroke="#fbb03b" stroke-width="4" stroke-linecap="round"/>', 'Clouds': '<path d="M41.5 15.5A14.5 14.5 0 0014.6 22a10.5 10.5 0 00-1.1 20.9h32.1a12.5 12.5 0 00.4-24.9z" fill="#e6e6e6" stroke="#e6e6e6" stroke-width="3"/>', 'Rain': '<path d="M41.5 15.5A14.5 14.5 0 0014.6 22a10.5 10.5 0 00-1.1 20.9h32.1a12.5 12.5 0 00.4-24.9z" fill="#e6e6e6" stroke="#e6e6e6" stroke-width="3"/><path d="M24 44l-2 8M32 44l-2 8M40 44l-2 8" stroke="#59a2ff" stroke-width="4" stroke-linecap="round"/>', 'Drizzle': '<path d="M41.5 15.5A14.5 14.5 0 0014.6 22a10.5 10.5 0 00-1.1 20.9h32.1a12.5 12.5 0 00.4-24.9z" fill="#e6e6e6" stroke="#e6e6e6" stroke-width="3"/><path d="M24 44l-1 4M32 44l-1 4M40 44l-1 4" stroke="#59a2ff" stroke-width="3" stroke-linecap="round"/>', 'Thunderstorm': '<path d="M41.5 15.5A14.5 14.5 0 0014.6 22a10.5 10.5 0 00-1.1 20.9h32.1a12.5 12.5 0 00.4-24.9z" fill="#e6e6e6" stroke="#e6e6e6" stroke-width="3"/><path d="M28 44l-4 8h4l-2 8l8-12h-4l4-4z" fill="#fbb03b" stroke="#fbb03b" stroke-width="2"/>', 'Snow': '<path d="M41.5 15.5A14.5 14.5 0 0014.6 22a10.5 10.5 0 00-1.1 20.9h32.1a12.5 12.5 0 00.4-24.9z" fill="#e6e6e6" stroke="#e6e6e6" stroke-width="3"/><path d="M32 44l-2 8M24 48l-4 4M40 48l4 4M28 44l4 8M24 48l4 4M36 48l-4 4" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>', 'Fog': '<path d="M41.5 15.5A14.5 14.5 0 0014.6 22a10.5 10.5 0 00-1.1 20.9h32.1a12.5 12.5 0 00.4-24.9z" fill="#e6e6e6" stroke="#e6e6e6" stroke-width="3"/><path d="M16 44h32M16 48h32M16 52h32" stroke="#b0b0b0" stroke-width="3"/>', 'Unknown': '<path d="M41.5 15.5A14.5 14.5 0 0014.6 22a10.5 10.5 0 00-1.1 20.9h32.1a12.5 12.5 0 00.4-24.9z" fill="#e6e6e6" stroke="#e6e6e6" stroke-width="3"/>'};
+
+            const botState = { messageLog: [], MAX_LOG_MESSAGES: 15, tipIndex: 0, lastGreetingHour: -1, proactiveTips: ["Remember to check plant leaves for any signs of pests or nutrient deficiencies.", "Clean water is happy water! Ensure your reservoir is clean to prevent algae growth.", "Proper airflow is important. Make sure the area around the plants is well-ventilated.", "Have you checked nutrient solution levels recently? Topping up is key for steady growth.", "Rotate the plants if possible to ensure they get even light exposure."] };
+            const isWateringTime = hour => (hour >= 7 && hour < 9) || (hour >= 12 && hour < 14) || (hour >= 17 && hour < 19);
+            
+            function logBotMessage(text, type) {
+                if (botState.messageLog.length > 0 && botState.messageLog[0].text === text) return;
+                const timestamp = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                botState.messageLog.unshift({ text, type, timestamp });
+                if (botState.messageLog.length > botState.MAX_LOG_MESSAGES) botState.messageLog.pop();
+                
+                const newLogEntry = document.createElement('div');
+                newLogEntry.className = 'bot-log-message';
+                newLogEntry.innerHTML = `<span>${text}</span><span class="timestamp">${timestamp} - ${type}</span>`;
+                elements.botLogTooltip.prepend(newLogEntry);
+                if (elements.botLogTooltip.children.length > botState.MAX_LOG_MESSAGES) {
+                    elements.botLogTooltip.lastChild.remove();
+                }
+
+                const latestCritical = botState.messageLog.find(msg => msg.type === 'critical');
+                if (latestCritical) {
+                    elements.botMessage.textContent = latestCritical.text;
+                    elements.botMessage.classList.add('visible');
+                } else {
+                    elements.botMessage.classList.remove('visible');
+                }
+            }
+            
+            function updateBotLogic(data) {
+                const { temp, ph, weatherCondition, weatherTemp, pumpIsOn } = data;
+                const currentHour = new Date().getHours();
+                let message;
+
+                if (ph < 5.5) message = { text: "CRITICAL: pH is dangerously low (acidic)! Correct immediately.", type: "critical" };
+                else if (ph > 8.5) message = { text: "CRITICAL: pH is dangerously high (alkaline)! Nutrient lockout risk.", type: "critical" };
+                else if (temp < 15) message = { text: "CRITICAL: Water is too cold! This can shock plant roots.", type: "critical" };
+                else if (temp > 35) message = { text: "CRITICAL: Water is too hot! Reduces oxygen, harms roots.", type: "critical" };
+                else if (ph < 6) message = { text: "pH is slightly acidic. Keep an eye on it.", type: "warning" };
+                else if (ph > 8) message = { text: "pH is slightly alkaline. Monitor for nutrient absorption issues.", type: "warning" };
+                else if (isWateringTime(currentHour) && !pumpIsOn) message = { text: "It's watering time! The pump is off, consider turning it on.", type: "suggestion" };
+                else if (!isWateringTime(currentHour) && pumpIsOn) message = { text: "Watering schedule is complete. You can turn the pump off to save energy.", type: "suggestion" };
+                else if (weatherCondition === 'Clear' && weatherTemp > 29 && !pumpIsOn && isWateringTime(currentHour)) message = { text: "Hot and sunny day during watering time! You should activate the pump.", type: "suggestion" };
+                else {
+                    if (currentHour >= 6 && currentHour < 12 && botState.lastGreetingHour !== currentHour) {
+                        message = { text: "Good morning! All systems look stable.", type: "greeting" };
+                        botState.lastGreetingHour = currentHour;
+                    } else if (currentHour >= 18 && currentHour < 22 && botState.lastGreetingHour !== currentHour) {
+                        message = { text: "Good evening. Conditions are normal. Time to check plant leaves.", type: "greeting" };
+                        botState.lastGreetingHour = currentHour;
+                    } else if (!botState.messageLog.length || botState.messageLog[0].type !== 'tip') {
+                        message = { text: botState.proactiveTips[botState.tipIndex], type: "tip" };
+                    }
+                }
+                if (message) logBotMessage(message.text, message.type);
+            }
+
+            const throttle = (func, limit) => { let inThrottle; return function() { if (!inThrottle) { func.apply(this, arguments); inThrottle = true; setTimeout(() => inThrottle = false, limit); }}};
+
+            const updateUI = (data) => {
+                const { temp, ph, weatherTemp, weatherFeelsLike, weatherHumidity, weatherCondition, weatherWind } = data;
+                elements.tempValue.textContent = temp.toFixed(2);
+                elements.phValue.textContent = ph.toFixed(2);
+                elements.weatherTemp.textContent = `${weatherTemp.toFixed(1)}°`;
+                elements.weatherFeelsLike.textContent = `${weatherFeelsLike.toFixed(1)}°`;
+                elements.weatherHumidity.textContent = `${parseInt(weatherHumidity)}%`;
+                elements.weatherWind.textContent = `${weatherWind.toFixed(1)} km/h`;
+                elements.weatherDesc.textContent = weatherCondition;
+                elements.weatherIcon.innerHTML = weatherIcons[weatherCondition] || weatherIcons['Unknown'];
+
+                const time = new Date().toLocaleTimeString();
+                const updateChartData = (chart, value) => {
+                    if (chart.data.labels.length > 20) { chart.data.labels.shift(); chart.data.datasets[0].data.shift(); }
+                    chart.data.labels.push(time);
+                    chart.data.datasets[0].data.push(value);
+                    if (value < chart.options.scales.y.min) chart.options.scales.y.min = Math.floor(value - 1);
+                    if (value > chart.options.scales.y.max) chart.options.scales.y.max = Math.ceil(value + 1);
+                    chart.update('none');
+                };
+                updateChartData(tempChart, temp);
+                updateChartData(phChart, ph);
+
+                elements.tempCard.classList.toggle('card--alert', temp < 15 || temp > 35);
+                elements.tempAlert.textContent = temp < 15 ? 'Temperature too low!' : temp > 35 ? 'Temperature too high!' : '';
+                elements.phCard.classList.toggle('card--alert', ph < 6 || ph > 8);
+                elements.phAlert.textContent = ph < 6 ? 'pH is acidic!' : ph > 8 ? 'pH is alkaline!' : '';
+                
+                updateBotLogic({ ...data, pumpIsOn: elements.pumpSwitch.checked });
+            };
+
+            const throttledUpdateUI = throttle(updateUI, 1000);
+
+            function connectWebSocket() {
+                const ws = new WebSocket('ws://192.168.1.7:6789');
+                ws.onopen = () => console.log('WebSocket connected');
                 ws.onmessage = (event) => {
                     const data = event.data.split(',');
                     if (data.length >= 7) {
                         const [sensorTemp, sensorPh, weatherTemp, weatherFeelsLike, weatherHumidity, weatherCondition, weatherWind] = data;
-
-                        // Update sensor data
-                        tempValueEl.textContent = parseFloat(sensorTemp).toFixed(2);
-                        phValueEl.textContent = parseFloat(sensorPh).toFixed(2);
-
-                        // Update weather data
-                        weatherTempEl.textContent = `${parseFloat(weatherTemp).toFixed(1)}°`;
-                        weatherFeelsLikeEl.textContent = `${parseFloat(weatherFeelsLike).toFixed(1)}°`;
-                        weatherHumidityEl.textContent = `${parseInt(weatherHumidity)}%`;
-                        weatherWindEl.textContent = `${parseFloat(weatherWind).toFixed(1)} km/h`;
-                        weatherDescEl.textContent = weatherCondition;
-
-                        // Update weather icon
-                        weatherIconEl.innerHTML = weatherIcons[weatherCondition] || weatherIcons['Unknown'];
-
-                        // Update charts
-                        const time = new Date().toLocaleTimeString();
-                        tempChart.data.labels.push(time);
-                        tempChart.data.datasets[0].data.push(parseFloat(sensorTemp));
-                        phChart.data.labels.push(time);
-                        phChart.data.datasets[0].data.push(parseFloat(sensorPh));
-
-                        if (tempChart.data.labels.length > 20) {
-                            tempChart.data.labels.shift();
-                            tempChart.data.datasets[0].data.shift();
-                            phChart.data.labels.shift();
-                            phChart.data.datasets[0].data.shift();
-                        }
-
-                        tempChart.update();
-                        phChart.update();
-
-                        // Alerts
-                        const temp = parseFloat(sensorTemp);
-                        const ph = parseFloat(sensorPh);
-                        tempCardEl.classList.toggle('card--alert', temp < 15 || temp > 35);
-                        tempAlertEl.textContent = temp < 26 ? 'Temperature too low!' : temp > 30 ? 'Temperature too high!' : '';
-                        phCardEl.classList.toggle('card--alert', ph < 6 || ph > 7);
-                        phAlertEl.textContent = ph < 6 ? 'pH too low!' : ph > 7 ? 'pH too high!' : '';
+                        throttledUpdateUI({
+                            temp: parseFloat(sensorTemp), ph: parseFloat(sensorPh),
+                            weatherTemp: parseFloat(weatherTemp), weatherFeelsLike: parseFloat(weatherFeelsLike),
+                            weatherHumidity: parseInt(weatherHumidity), weatherCondition, weatherWind: parseFloat(weatherWind)
+                        });
                     }
                 };
-
-                ws.onclose = () => {
-                    console.log('WebSocket disconnected, reconnecting...');
-                    weatherDescEl.textContent = 'Disconnected, reconnecting...';
-                    setTimeout(connectWebSocket, 5000);
-                };
-
-                ws.onerror = (error) => {
-                    console.error('WebSocket error:', error);
-                    weatherDescEl.textContent = 'WebSocket error';
-                };
+                ws.onclose = () => { console.log('WebSocket disconnected, reconnecting...'); setTimeout(connectWebSocket, 5000); };
+                ws.onerror = (error) => console.error('WebSocket error:', error);
+                elements.pumpSwitch.onchange = () => { if (ws && ws.readyState === WebSocket.OPEN) { ws.send(elements.pumpSwitch.checked ? 'ON' : 'OFF'); } };
             }
-
-            // --- Pump Control ---
-            pumpSwitch.addEventListener('change', () => {
-                if (ws && ws.readyState === WebSocket.OPEN) {
-                    ws.send(pumpSwitch.checked ? 'ON' : 'OFF');
-                }
+            
+            elements.botAvatar.addEventListener('click', () => elements.botLogTooltip.classList.toggle('visible'));
+            document.addEventListener('click', (e) => {
+                if (!elements.botContainer.contains(e.target)) elements.botLogTooltip.classList.remove('visible');
             });
+            setInterval(() => { botState.tipIndex = (botState.tipIndex + 1) % botState.proactiveTips.length; }, 30000);
 
-            // Start WebSocket connection
+            logBotMessage(`Hello! System initialized at ${new Date().toLocaleTimeString('en-US')}. Monitoring now...`, "greeting");
             connectWebSocket();
         });
     </script>
