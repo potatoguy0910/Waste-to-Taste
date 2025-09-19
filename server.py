@@ -86,7 +86,7 @@ async def serial_reader():
 
         if SIMULATE:
             simulated_temp = round(random.uniform(28.00, 31.00), 2)
-            simulated_ph = round(random.uniform(3.0, 8.0), 2)
+            simulated_ph = round(random.uniform(6.0, 8.0), 2)
             combined_data = f"{simulated_temp},{simulated_ph},{weather_data['temp']},{weather_data['feels_like']},{weather_data['humidity']},{weather_data['condition']},{weather_data['wind_speed']}"
             print(f"[Simulated + Weather] {combined_data}")
             if connected_clients:
